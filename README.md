@@ -21,6 +21,10 @@
 ---
 
 ## Задача 2
+
+
+
+
 Сформировать таблицы баз данных по условиям:
 
 
@@ -40,6 +44,28 @@
 • Игровой номер игрока
 
 ### Решение
-1223
+```sql
+SELECT
+CONCAT(seasons.start_year, '-', seasons.end_year) as season,
+CONCAT(clubs.name, ' / ', tcl.name) as club,
+CONCAT(cities.name, ' / ', tc.name) as city,
+CONCAT(players.fio, ' / ', tp.name) as player
+FROM seasons
+INNER JOIN seasons_clubs ON seasons_clubs.season_id = seasons.id
+INNER JOIN clubs ON seasons_clubs.club_id = clubs.id
+INNER JOIN translates tcl ON (tcl.model_id = clubs.id
+AND tcl.model_type = 'App\\Models\\Club'
+AND tcl.language_id = 1)
+INNER JOIN cities on clubs.city_id = cities.id
+INNER JOIN translates tc ON (tc.model_id = cities.id
+AND tc.model_type = 'App\\Models\\City'
+AND tc.language_id = 1)
+INNER JOIN players on clubs.id = players.club_id
+INNER JOIN translates tp ON (tp.model_id = players.id
+AND tp.model_type = 'App\\Models\\Player'
+AND tp.language_id = 1)
+ORDER BY seasons.id;
+```
+
 
 ---
