@@ -1,0 +1,59 @@
+services:
+  mysql:
+    container_name: demo2_mysql
+    image: mysql:8.0.40
+    restart: on-failure
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=demo2
+      - MYSQL_USER=demo2
+      - MYSQL_PASSWORD=demo2
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - internal
+    ports:
+      - 3307:3306
+
+  redis:
+    container_name: demo2_redis
+    image: redis:7.2.1
+    restart: on-failure
+    networks:
+      - internal
+    labels:
+      - traefik.enable=false
+
+  app:
+    container_name: demo2_app
+    image: demo2_app:latest
+    restart: on-failure
+    networks:
+      - internal
+    depends_on:
+      - mysql
+      - redis
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile_local
+      target: app
+      args:
+        - ENV=local
+
+
+  nginx:
+    container_name: demo2_nginx
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile_local
+      target: nginx
+    restart: on-failure
+    ports:
+      - 8090:80
+    networks:
+      - internal
+    depends_on:
+      - app
+
+networks:
+  internal:
